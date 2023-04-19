@@ -61,9 +61,8 @@ def profile():
     # TODO procedure
     return response_body
   elif request.method == 'PUT':
-    data = request.json
     # TODO procedure here with try catch (error code)
-    return jsonify(success=True)
+    return {"message": "updated profile successfully!"}
 
 @app.route("/logout", methods=["POST"])
 def logout():
