@@ -33,7 +33,8 @@ def register():
 
   # TODO procedure here with try catch (error code)
 
-  return jsonify(success=True)
+  # TODO update message depending on success or not
+  return {"message": "registered successfully!"}
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -72,7 +73,7 @@ def logout():
 
 @app.route("/user/<string:username>/trips", methods=['GET'])
 @jwt_required()
-def trip(username):
+def trips(username):
   response_body = [
     {
       "trip_id": "1",
@@ -94,7 +95,50 @@ def trip(username):
     }
   ]
   # TODO procedure: find all trips for username, error if given undefined
-  return response_body
+
+  if username != "undefined":
+    return response_body
+  else:
+    # TODO error
+    return jsonify(success=False)
+
+@app.route("/trip", methods=['POST'])
+@jwt_required()
+def create_trip():
+  data = request.json
+
+  # TODO procedure here with try catch (error code)
+
+  return data
+
+@app.route("/trip/<int:trip_id>", methods=['GET', 'PUT'])
+@jwt_required()
+def trip(trip_id):
+  if request.method == 'GET':
+    response_body = {
+      "trip_id": "1",
+      "trip_name": "Dummy Trip Name",
+      "description": "Dummy Description",
+      "city": "Boston",
+      "country": "United States",
+      "start_date": "2023-04-01",
+      "end_date": "2023-04-05",
+      "trip_owner": "test",
+      "attendees": [
+        {
+          "attendee": "test1"
+        },
+        {
+          "attendee": "test2"
+        }
+      ]
+    }
+
+    # TODO procedure here
+
+    return response_body
+  elif request.method == 'PUT':
+    return {"message": "updated trip successfully!"}
 
 if __name__ == "__main__":
   app.run(port=8000, debug=True)
