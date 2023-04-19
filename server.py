@@ -111,7 +111,7 @@ def create_trip():
 
   return data
 
-@app.route("/trip/<int:trip_id>", methods=['GET', 'PUT'])
+@app.route("/trip/<int:trip_id>", methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def trip(trip_id):
   if request.method == 'GET':
@@ -139,6 +139,8 @@ def trip(trip_id):
     return response_body
   elif request.method == 'PUT':
     return {"message": "updated trip successfully!"}
+  elif request.method == 'DELETE':
+    return {"message": "deleted trip successfully!"}
 
 if __name__ == "__main__":
   app.run(port=8000, debug=True)
