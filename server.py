@@ -163,15 +163,17 @@ try:
           "expense_id": "1",
           "expense_name": "Dummy Expense Name",
           "total_cost": 50,
-          "amount_owed": 25,
-          "transaction_completed": 0
+          "amount_owed": 0,
+          "transaction_completed": 1,
+          "expense_owner": "test"
         },
         {
           "expense_id": "2",
           "expense_name": "Dummy Expense Name 2",
           "total_cost": 100,
           "amount_owed": 50,
-          "transaction_completed": 1,
+          "transaction_completed": 0,
+          "expense_owner": "test2",
           "accomodation": {
             "address": "123 Street Boston, MA 02118",
             "start_date": "2023-04-10",
