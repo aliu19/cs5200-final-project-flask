@@ -150,11 +150,15 @@ def expenses(trip_id):
         "expense_id": "1",
         "expense_name": "Dummy Expense Name",
         "total_cost": 50,
+        "amount_owed": 25,
+        "transaction_completed": 0
       },
       {
         "expense_id": "2",
         "expense_name": "Dummy Expense Name 2",
         "total_cost": 100,
+        "amount_owed": 50,
+        "transaction_completed": 1,
         "accomodation": {
           "address": "123 Street Boston, MA 02118",
           "start_date": "2023-04-10",
@@ -167,9 +171,14 @@ def expenses(trip_id):
 
     return response_body
 
-@app.route("/expense/<int:expense_id>", methods=["DELETE"])
-def delete_expense(expense_id):
-  return {"message": "deleted expense successfully!"}
+@app.route("/expense/<int:expense_id>", methods=["DELETE", "PUT"])
+def expense(expense_id):
+  if request.method == 'DELETE':
+    return {"message": "deleted expense successfully!"}
+  elif request.method == 'PUT':
+    username = request.json["username"]
+    print(username)
+    return {"message": "updated expense successfully!"}
 
 @app.route("/expense", methods=['POST'])
 @jwt_required()
