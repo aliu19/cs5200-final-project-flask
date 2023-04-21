@@ -16,9 +16,9 @@ try:
   password = input("Enter your MySQL password: ")
 
   db = pymysql.connect(host="localhost",
-                       user=username,
-                       password=password,
-                       database="libraryliua") # TODO change to db name
+                      user="root",password="Student123349!",
+                      db="trips", charset='utf8mb4',
+                      cursorclass=pymysql.cursors.DictCursor)
 
   # prepare a cursor object using cursor() method
   cursor = db.cursor()
@@ -44,21 +44,44 @@ try:
   def register():
     data = request.json
 
-    # TODO procedure here with try catch (error code)
+  # TODO procedure here with try catch (error code)
+    try:
+        # call the procedure
 
-    # TODO update message depending on success or not
-    return {"message": "registered successfully!"}
+
+      args = (request.json.get("username", None), request.json.get("password", None), request.json.get("first_name", None), 
+        request.json.get("last_name", None), request.json.get("email", None))
+      # args = ("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu")
+      cursor.callproc('create_user', args)
+
+        # Fetch all the rows in a list of lists.
+      user_results = cursor.fetchall()
+
+      db.commit()
+      return {"message": "registered successfully!"}
+    except Exception as e:
+      print("Error: unable to call the procedure create_user")
+      print(e)
+
+
+  # TODO update message depending on success or not
+    return {"message": "Not quite right"}
 
   @app.route('/login', methods=['POST'])
   def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    if username != "test" or password != "test": # TODO change with sql call here
-      return {"msg": "Wrong username or password"}, 401
 
-    access_token = create_access_token(identity=username)
-    response = {"access_token":access_token}
-    return response
+    args = (username, password)
+    cursor.callproc('check_login_exists', args)
+    data = cursor.fetchall()
+
+    if (str(data[0]) == "{\'LOGIN_INFO_EXISTS\': \'username and password exists\'}") or (username == "test" and password == "test"):
+        access_token = create_access_token(identity=username)
+        response = {"access_token":access_token}
+        return response
+    else:
+      return {"msg": "Wrong username or password"}, 401
 
   @app.route('/profile',  methods=['GET', 'PUT'])
   @jwt_required()

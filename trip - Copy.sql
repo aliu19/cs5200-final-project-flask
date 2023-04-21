@@ -177,8 +177,8 @@ DELIMITER ;
 
 START transaction;
 CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-INSERT INTO trip (city, country, tripNAME, description, startDATE, endDATE, owner)
-VALUES ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+INSERT INTO trip (tripNAME, description, city, country,  startDATE, endDATE, owner)
+VALUES ("MyTrip", "", "Boston", "USA",  '2024-01-01', '2024-01-08', "enguyen1");
 CALL update_trip_city(1, "Springfield");
 CALL update_trip_country(1, "UK");
 CALL update_trip_name(1, "MyTrip2UK");
