@@ -111,69 +111,36 @@ try:
   @app.route("/user/<string:username>/trips", methods=['GET'])
   @jwt_required()
   def trips(username):
-    response_body = [
-      {
-        "trip_id": "1",
-        "trip_name": "Dummy Trip Name",
-        "description": "Dummy Description",
-        "city": "Boston",
-        "country": "United States",
-        "start_date": "2023-04-01",
-        "end_date": "2023-04-05"
-      },
-      {
-        "trip_id": "2",
-        "trip_name": "Dummy Trip Name 2",
-        "description": "Dummy Description 2",
-        "city": "Boston",
-        "country": "United States",
-        "start_date": "2023-04-03",
-        "end_date": "2023-04-10"
-      }
-    ]
-    # TODO procedure: find all trips for username, error if given undefined
-
-    if username != "undefined":
-      return response_body
-    else:
-      # TODO error
-      return jsonify(success=False)
+    if request.method == 'GET':
+      try:
+        cursor.callproc('get_trips', username)
+        data = cursor.fetchall()
+        return jsonify(data)
+      except Exception as e:
+        return {"msg": str(e)}, 400
 
   @app.route("/trip", methods=['POST'])
   @jwt_required()
   def create_trip():
-    data = request.json
-
-    # TODO procedure here with try catch (error code)
-
-    return data
+    try:
+      args = request.json["trip_name"], request.json["description"], request.json["city"], request.json["country"], request.json["start_date"], request.json["end_date"], request.json["trip_owner"]
+      cursor.callproc("create_trip", args)
+      db.commit()
+      return {"message": "Successfully created trip: " + request.json["trip_name"]}
+    except Exception as e:
+      return {"msg": str(e)}, 400
 
   @app.route("/trip/<int:trip_id>", methods=['GET', 'PUT', 'DELETE'])
   @jwt_required()
   def trip(trip_id):
     if request.method == 'GET':
-      response_body = {
-        "trip_id": "1",
-        "trip_name": "Dummy Trip Name",
-        "description": "Dummy Description",
-        "city": "Boston",
-        "country": "United States",
-        "start_date": "2023-04-01",
-        "end_date": "2023-04-05",
-        "trip_owner": "test",
-        "attendees": [
-          {
-            "attendee": "test1"
-          },
-          {
-            "attendee": "test2"
-          }
-        ]
-      }
-
-      # TODO procedure here
-
-      return response_body
+      try:
+        cursor.callproc("get_trip_info", [trip_id])
+        trip = cursor.fetchall()[0]
+        print(trip)
+        return jsonify(trip)
+      except Exception as e:
+        return {"msg": str(e)}, 400
     elif request.method == 'PUT':
       return {"message": "updated trip successfully!"}
     elif request.method == 'DELETE':
