@@ -84,10 +84,10 @@ DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS trip (
 tripID INT AUTO_INCREMENT PRIMARY KEY,
-city varchar(32) NOT NULL,
-country varchar(32) NOT NULL,
 tripName varchar(32) NOT NULL,
 description varchar(32) DEFAULT NULL,
+city varchar(32) NOT NULL,
+country varchar(32) NOT NULL,
 startDate DATE NOT NULL, 
 endDate DATE NOT NULL,
 owner varchar(32),
@@ -207,8 +207,8 @@ startDate_p DATE,
 endDate_p DATE,
 owner_p varchar(32))
 BEGIN 
-INSERT INTO trip (city, country, tripNAME, description, startDATE, endDATE, owner)
-VALUES (city_p, country_p, tripNAME_p, description_p, startDATE_p, endDATE_p, owner_p);
+INSERT INTO trip (tripNAME, description, city, country, startDATE, endDATE, owner)
+VALUES (tripNAME_p, description_p, city_p, country_p, startDATE_p, endDATE_p, owner_p);
 END$$
 
 DELIMITER ;
@@ -247,13 +247,42 @@ DELIMITER ;
 
 ## Test Code to get list of attendees
 
-## START transaction;
-## CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-## CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-## CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
-## INSERT INTO attends VALUES (5, "enguyen2");
-## SELECT GROUP_CONCAT(username) FROM attends GROUP BY tripID;
-## ROLLBACK;
+START transaction;
+CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+INSERT INTO attends VALUES (2, "enguyen2");
+SELECT trip.*, GROUP_CONCAT(username)
+FROM trip 
+JOIN attends
+USING(tripID)
+GROUP BY tripID
+HAVING tripID = 2;
+ROLLBACK;
+
+DELIMITER $$
+
+CREATE PROCEDURE get_trip_info (
+tripID_p INT)
+BEGIN 
+SELECT trip.*, GROUP_CONCAT(username)
+FROM trip 
+JOIN attends
+USING(tripID)
+GROUP BY tripID
+HAVING tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+START transaction;
+CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+INSERT INTO attends VALUES (3, "enguyen2");
+CALL get_trip_info(3);
+ROLLBACK;
+
 
 DELIMITER $$
 
