@@ -135,10 +135,10 @@ DELIMITER ;
 -- create and update trip procedures
 DELIMITER $$
 CREATE PROCEDURE create_trip (
+	tripName_p VARCHAR(32),
+    description_p VARCHAR(32),
 	city_p VARCHAR(32),
 	country_p VARCHAR(32),
-	tripName_p VARCHAR(32),
-	description_p VARCHAR(32),
 	startDate_p DATE, 
 	endDate_p DATE,
 	owner_p varchar(32)
@@ -257,7 +257,7 @@ CREATE PROCEDURE get_trip_info (
 	tripID_p INT
 )
 BEGIN 
-	SELECT trip.*, GROUP_CONCAT(username) FROM trip 
+	SELECT trip.*, GROUP_CONCAT(username) AS attendees FROM trip 
 	JOIN attends USING(tripID)
 	GROUP BY tripID
 	HAVING tripID = tripID_p;
