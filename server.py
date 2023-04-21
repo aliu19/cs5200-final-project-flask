@@ -150,22 +150,25 @@ try:
   def trip(trip_id):
     if request.method == 'PUT':
       try:
-        if request.json["trip_name"]:
+        data = request.json
+        keys = data.keys()
+
+        if "trip_name" in keys:
           args = trip_id, request.json["trip_name"]
           cursor.callproc("update_trip_name", args)
-        if request.json["description"]:
+        if "description" in keys:
           args = trip_id, request.json["description"]
           cursor.callproc("update_trip_description", args)
-        if request.json["city"]:
+        if "city" in keys:
           args = trip_id, request.json["city"]
           cursor.callproc("update_trip_city", args)
-        if request.json["country"]:
+        if "country" in keys:
           args = trip_id, request.json["country"]
           cursor.callproc("update_trip_country", args)
-        if request.json["start_date"]:
+        if "start_date" in keys:
           args = trip_id, request.json["start_date"]
           cursor.callproc("update_trip_start_date", args)
-        if request.json["end_date"]:
+        if "end_date" in keys:
           args = trip_id, request.json["end_date"]
           cursor.callproc("update_trip_end_date", args)
 
