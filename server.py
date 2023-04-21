@@ -130,19 +130,50 @@ try:
     except Exception as e:
       return {"msg": str(e)}, 400
 
-  @app.route("/trip/<int:trip_id>", methods=['GET', 'PUT', 'DELETE'])
-  @jwt_required()
-  def trip(trip_id):
+  @app.route("/trip/<int:trip_id>/<string:username>", methods=['GET'])
+  def get_trip(trip_id, username):
     if request.method == 'GET':
       try:
-        cursor.callproc("get_trip_info", [trip_id])
+        args = trip_id, username
+        cursor.callproc("get_trip_info", args)
         trip = cursor.fetchall()[0]
-        print(trip)
+
+        attendees = trip["attendees"].split(",")
+        trip["attendees"] = [dict(attendee = a) for a in attendees]
+
         return jsonify(trip)
       except Exception as e:
         return {"msg": str(e)}, 400
-    elif request.method == 'PUT':
-      return {"message": "updated trip successfully!"}
+
+  @app.route("/trip/<int:trip_id>", methods=['PUT', 'DELETE'])
+  @jwt_required()
+  def trip(trip_id):
+    if request.method == 'PUT':
+      try:
+        if request.json["trip_name"]:
+          args = trip_id, request.json["trip_name"]
+          cursor.callproc("update_trip_name", args)
+        if request.json["description"]:
+          args = trip_id, request.json["description"]
+          cursor.callproc("update_trip_description", args)
+        if request.json["city"]:
+          args = trip_id, request.json["city"]
+          cursor.callproc("update_trip_city", args)
+        if request.json["country"]:
+          args = trip_id, request.json["country"]
+          cursor.callproc("update_trip_country", args)
+        if request.json["start_date"]:
+          args = trip_id, request.json["start_date"]
+          cursor.callproc("update_trip_start_date", args)
+        if request.json["end_date"]:
+          args = trip_id, request.json["end_date"]
+          cursor.callproc("update_trip_end_date", args)
+
+        db.commit()
+
+        return {"message": "Updated trip successfully!"}
+      except Exception as e:
+        return {"message": str(e)}, 400
     elif request.method == 'DELETE':
       return {"message": "deleted trip successfully!"}
 

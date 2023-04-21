@@ -254,10 +254,11 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE get_trip_info (
-	tripID_p INT
+	tripID_p INT,
+    username_p VARCHAR(32)
 )
 BEGIN 
-	SELECT trip.*, GROUP_CONCAT(username) AS attendees FROM trip 
+	SELECT trip.*, GROUP_CONCAT(IF(username != username_p, username, NULL) SEPARATOR ', ') AS attendees FROM trip 
 	JOIN attends USING(tripID)
 	GROUP BY tripID
 	HAVING tripID = tripID_p;
