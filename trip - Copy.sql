@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS trips;
 CREATE DATABASE IF NOT EXISTS trips;
 use trips;
 
@@ -332,17 +333,8 @@ SELECT username, password
 FROM user
 WHERE username = username_p AND password = password_p) AS numRowsRS);
 
-#SELECT @numrows;
+SELECT @numrows;
 
-IF (@numRows = 1)
-THEN
-SELECT 'username and password exists' AS LOGIN_INFO_EXISTS;
-END IF;
-
-IF (@numRows = 0)
-THEN
-SELECT 'username and password does not exists' AS LOGIN_INFO_NOT_EXISTS;
-END IF;
 END$$
 
 DELIMITER ;

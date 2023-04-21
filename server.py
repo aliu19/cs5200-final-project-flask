@@ -12,16 +12,17 @@ try:
   app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
   jwt = JWTManager(app)
 
+  # TODO PUT BACK
   username = input("Enter your MySQL username: ")
   password = input("Enter your MySQL password: ")
 
   db = pymysql.connect(host="localhost",
-                      user="root",password="Student123349!",
-                      db="trips", charset='utf8mb4',
-                      cursorclass=pymysql.cursors.DictCursor)
+                       user=username,
+                       password=password,
+                       database="trips") # TODO change to db name
 
   # prepare a cursor object using cursor() method
-  cursor = db.cursor()
+  cursor = db.cursor(pymysql.cursors.DictCursor)
 
   @app.after_request
   def refresh_expiring_jwts(response):
@@ -42,46 +43,39 @@ try:
 
   @app.route('/register', methods=['POST'])
   def register():
-    data = request.json
-
-  # TODO procedure here with try catch (error code)
     try:
-        # call the procedure
-
-
-      args = (request.json.get("username", None), request.json.get("password", None), request.json.get("first_name", None), 
-        request.json.get("last_name", None), request.json.get("email", None))
-      # args = ("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu")
-      cursor.callproc('create_user', args)
-
-        # Fetch all the rows in a list of lists.
-      user_results = cursor.fetchall()
-
+      args = request.json["username"], request.json["password"], request.json["first_name"], request.json["last_name"], request.json["email"]
+      cursor.callproc("create_user", args)
       db.commit()
-      return {"message": "registered successfully!"}
+      return {"msg": "Successfully registered user: " + request.json["username"]}
     except Exception as e:
-      print("Error: unable to call the procedure create_user")
-      print(e)
-
-
-  # TODO update message depending on success or not
-    return {"message": "Not quite right"}
+      return {"msg": str(e)}, 400
 
   @app.route('/login', methods=['POST'])
   def login():
-    username = request.json.get("username", None)
-    password = request.json.get("password", None)
+    try:
+      username = request.json["username"]
+      args = username, request.json["password"]
+      cursor.callproc('check_login_exists', args)
+      data = cursor.fetchall()
 
-    args = (username, password)
-    cursor.callproc('check_login_exists', args)
-    data = cursor.fetchall()
+      if data[0]['@numrows'] == 1:
+        try:
+          access_token = create_access_token(identity=username)
 
-    if (str(data[0]) == "{\'LOGIN_INFO_EXISTS\': \'username and password exists\'}") or (username == "test" and password == "test"):
-        access_token = create_access_token(identity=username)
-        response = {"access_token":access_token}
-        return response
-    else:
-      return {"msg": "Wrong username or password"}, 401
+          get_user = "SELECT * FROM user WHERE username = \""  + request.json["username"] + "\""
+          cursor.execute(get_user)
+
+          user_result = cursor.fetchall()[0]
+          user_result["access_token"] = access_token
+
+          return jsonify(user_result)
+        except Exception as e:
+          return {"msg": str(e)}, 400
+      else:
+        return {"msg": "Incorrect username or password"}, 400
+    except Exception as e:
+      return {"msg": str(e)}, 400
 
   @app.route('/profile',  methods=['GET', 'PUT'])
   @jwt_required()
@@ -230,4 +224,4 @@ except Exception as e:
   print(e)
 
 if __name__ == "__main__":
-  app.run(port=8000)
+  app.run(port=8000, debug=True)
