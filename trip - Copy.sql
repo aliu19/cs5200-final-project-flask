@@ -264,3 +264,17 @@ BEGIN
 	HAVING tripID = tripID_p;
 END$$
 DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE create_expense (
+	expenseName_p VARCHAR(32),
+    cost_p INT
+)
+BEGIN 
+	INSERT INTO expense (expenseName, total_cost) VALUES (expenseName_p, cost_p);
+END$$
+DELIMITER ;
+
+START TRANSACTION;
+CALL create_expense('food', 100);
+ROLLBACK;
