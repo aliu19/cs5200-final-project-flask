@@ -138,8 +138,11 @@ try:
         cursor.callproc("get_trip_info", args)
         trip = cursor.fetchall()[0]
 
-        attendees = trip["attendees"].split(",")
-        trip["attendees"] = [dict(attendee = a) for a in attendees]
+        if trip["attendees"] is None:
+          trip["attendees"] = []
+        else:
+          attendees = trip["attendees"].split(",")
+          trip["attendees"] = [dict(attendee = a) for a in attendees]
 
         return jsonify(trip)
       except Exception as e:
