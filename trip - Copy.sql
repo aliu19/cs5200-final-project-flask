@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS repay (
 	FOREIGN KEY (owedTo) REFERENCES user(username) ON DELETE CASCADE
 );
 
--- user procedures
+-- create and update user procedures
 DELIMITER $$
 CREATE PROCEDURE create_user (
 	username_p VARCHAR(32),
@@ -117,7 +117,22 @@ BEGIN
 END$$
 DELIMITER ;
 
--- trip procedures
+DELIMITER $$
+CREATE PROCEDURE check_login_exists (
+	username_p VARCHAR(32),
+	password_p VARCHAR(32)
+)
+BEGIN 
+	SET @numRows = (SELECT COUNT(*) FROM (
+			SELECT username, password FROM user
+			WHERE username = username_p AND password = password_p
+        ) AS numRowsRS);
+
+	SELECT @numrows;
+END$$
+DELIMITER ;
+
+-- create and update trip procedures
 DELIMITER $$
 CREATE PROCEDURE create_trip (
 	city_p VARCHAR(32),
@@ -206,6 +221,17 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- TODO add or delete depending on list given
+DELIMITER $$
+CREATE PROCEDURE add_person_to_trip (
+	tripID_p INT,
+	username_p VARCHAR(32)
+)
+BEGIN 
+	INSERT INTO attends (tripID, username) VALUES (tripID_p, username_p);
+END$$
+DELIMITER ;
+
 -- trip triggers
 DELIMITER  $$
 CREATE TRIGGER add_attendee_after_adding_trip AFTER INSERT 
@@ -213,6 +239,16 @@ ON trip
 FOR EACH ROW
 BEGIN
 	INSERT INTO attends VALUES (NEW.tripID, NEW.owner);
+END$$
+DELIMITER ;
+
+-- get trip procedures
+DELIMITER $$
+CREATE PROCEDURE get_trips (
+	username_p VARCHAR(32)
+)
+BEGIN
+    SELECT * FROM trip WHERE tripID IN (SELECT tripID FROM attends WHERE username = username_p);
 END$$
 DELIMITER ;
 
@@ -225,40 +261,5 @@ BEGIN
 	JOIN attends USING(tripID)
 	GROUP BY tripID
 	HAVING tripID = tripID_p;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE PROCEDURE get_owner_active_trips (
-	username_p VARCHAR(32)
-)
-BEGIN 
-	SELECT tripID, tripName FROM trip
-	WHERE owner = username_p;
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE PROCEDURE add_person_to_trip (
-	tripID_p INT,
-	username_p VARCHAR(32)
-)
-BEGIN 
-	INSERT INTO attends (tripID, username) VALUES (tripID_p, username_p);
-END$$
-DELIMITER ;
-
-DELIMITER $$
-CREATE PROCEDURE check_login_exists (
-	username_p varchar(32),
-	password_p varchar(32)
-)
-BEGIN 
-	SET @numRows = (SELECT COUNT(*) FROM (
-			SELECT username, password FROM user
-			WHERE username = username_p AND password = password_p
-        ) AS numRowsRS);
-
-	SELECT @numrows;
 END$$
 DELIMITER ;
