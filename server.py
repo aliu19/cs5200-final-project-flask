@@ -63,7 +63,7 @@ try:
         try:
           access_token = create_access_token(identity=username)
 
-          get_user = "SELECT * FROM user WHERE username = \""  + request.json["username"] + "\""
+          get_user = "SELECT * FROM user WHERE username = \"" + request.json["username"] + "\""
           cursor.execute(get_user)
 
           user_result = cursor.fetchall()[0]
@@ -77,22 +77,30 @@ try:
     except Exception as e:
       return {"msg": str(e)}, 400
 
-  @app.route('/profile',  methods=['GET', 'PUT'])
+  @app.route('/user/<string:username>',  methods=['GET', 'PUT'])
   @jwt_required()
-  def profile():
+  def profile(username):
     if request.method == 'GET':
-      response_body = {
-        "username": "test",
-        "password" :"test",
-        "first_name": "test_first",
-        "last_name": "test_last",
-        "email": "test@email.com"
-      }
-      # TODO procedure
-      return response_body
+      try:
+        get_user = "SELECT * FROM user WHERE username = \"" + username + "\""
+        cursor.execute(get_user)
+        user_result = cursor.fetchall()[0]
+        return jsonify(user_result)
+      except Exception as e:
+        return {"msg": str(e)}, 400
     elif request.method == 'PUT':
-      # TODO procedure here with try catch (error code)
-      return {"message": "updated profile successfully!"}
+      try:
+        first_name =  username, request.json["first_name"]
+        last_name = username, request.json["last_name"]
+        password = username, request.json["password"]
+
+        cursor.callproc("update_user_firstName", first_name)
+        cursor.callproc("update_user_lastName", last_name)
+        cursor.callproc("update_user_password", password)
+        db.commit()
+        return {"message": "Successfully updated user: " + username}
+      except Exception as e:
+        return {"msg": str(e)}, 400
 
   @app.route("/logout", methods=["POST"])
   def logout():
