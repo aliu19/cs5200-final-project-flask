@@ -9,9 +9,9 @@ lastName varchar(32) NOT NULL,
 email varchar(32) NOT NULL
 );
 
-START TRANSACTION;
-INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-ROLLBACK;
+#START TRANSACTION;
+#INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#ROLLBACK;
 
 DELIMITER $$
 
@@ -27,9 +27,9 @@ END$$
 
 DELIMITER ;
 
-START TRANSACTION;
-CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-ROLLBACK;
+#START TRANSACTION;
+#CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#ROLLBACK;
 
 DELIMITER $$
 
@@ -72,37 +72,15 @@ END$$
 
 DELIMITER ;
 
-START TRANSACTION;
-CALL update_user_password('enguyen1', 'nguyen15');
-CALL update_user_firstName('enguyen1', 'Erick');
-CALL update_user_lastName('enguyen1', 'Ngyen');
-ROLLBACK;
+#START TRANSACTION;
+#CALL update_user_password('enguyen1', 'nguyen15');
+#CALL update_user_firstName('enguyen1', 'Erick');
+#CALL update_user_lastName('enguyen1', 'Ngyen');
+#ROLLBACK;
 
-
-CREATE TABLE IF NOT EXISTS geography (
-city varchar(32) NOT NULL,
-country varchar(32) NOT NULL,
-PRIMARY KEY(city, country)
-);
-
-START TRANSACTION;
-INSERT INTO geography VALUES ("Boston", "USA");
-ROLLBACK;
-
-DELIMITER $$
-
-CREATE PROCEDURE create_location (
-city_p varchar(32),
-country_p varchar(32))
-BEGIN 
-INSERT INTO geography VALUES (city_p, country_p);
-END$$
-
-DELIMITER ;
-
-START TRANSACTION;
-CALL create_location("Boston", "USA");
-ROLLBACK;
+#START TRANSACTION;
+#CALL create_location("Boston", "USA");
+#ROLLBACK;
 
 CREATE TABLE IF NOT EXISTS trip (
 tripID INT AUTO_INCREMENT PRIMARY KEY,
@@ -114,36 +92,109 @@ startDate DATE NOT NULL,
 endDate DATE NOT NULL,
 owner varchar(32),
 CONSTRAINT creates FOREIGN KEY (owner)
-REFERENCES user(username) ON DELETE CASCADE,
-CONSTRAINT takes_place_in FOREIGN KEY (city, country) 
-REFERENCES geography(city, country) ON DELETE CASCADE
+REFERENCES user(username) ON DELETE CASCADE
 );
 
-START transaction;
-CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL create_location("Boston", "USA");
-INSERT INTO trip (city, country, tripNAME, description, startDATE, endDATE, owner)
-VALUES ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
-ROLLBACK;
+DELIMITER $$
 
-
-DELIMITER  $$
-
-CREATE TRIGGER geography_before_insert_trip
-BEFORE INSERT 
-ON trip
-FOR EACH ROW
-BEGIN
-	INSERT INTO geography VALUES (NEW.city, NEW.country);
+CREATE PROCEDURE update_trip_name (
+tripID_p INT,
+tripName_p varchar(32))
+BEGIN 
+UPDATE trip
+SET tripName = tripName_p
+WHERE tripID = tripID_p;
 END$$
 
 DELIMITER ;
 
-START TRANSACTION;
-INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+DELIMITER $$
+
+CREATE PROCEDURE update_trip_city (
+tripID_p INT,
+city_p varchar(32))
+BEGIN 
+UPDATE trip
+SET city = city_p
+WHERE tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE update_trip_desc (
+tripID_p INT,
+description_p varchar(32))
+BEGIN 
+UPDATE trip
+SET description = description_p
+WHERE tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE update_trip_country (
+tripID_p INT,
+country_p varchar(32))
+BEGIN 
+UPDATE trip
+SET country = country_p
+WHERE tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE update_trip_start_date (
+tripID_p INT,
+startDate_p DATE)
+BEGIN 
+UPDATE trip
+SET startDate = startDate_p
+WHERE tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE update_trip_end_date (
+tripID_p INT,
+endDate_p DATE)
+BEGIN 
+UPDATE trip
+SET endDate = endDate_p
+WHERE tripID = tripID_p;
+END$$
+
+DELIMITER ;
+
+
+
+START transaction;
+CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
 INSERT INTO trip (city, country, tripNAME, description, startDATE, endDATE, owner)
 VALUES ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+CALL update_trip_city(1, "Springfield");
+CALL update_trip_country(1, "UK");
+CALL update_trip_name(1, "MyTrip2UK");
+CALL update_trip_desc(1, "Next Destination!");
+CALL update_trip_start_date(1, "2024-01-02");
+CALL update_trip_end_date(1, "2024-01-15");
 ROLLBACK;
+
+
+
+
+#START TRANSACTION;
+#INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#INSERT INTO trip (city, country, tripNAME, description, startDATE, endDATE, owner)
+#VALUES ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+#ROLLBACK;
 
 DELIMITER $$
 
@@ -162,10 +213,10 @@ END$$
 
 DELIMITER ;
 
-START TRANSACTION;
-INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
-ROLLBACK;
+#START TRANSACTION;
+#INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+#ROLLBACK;
 
 CREATE TABLE IF NOT EXISTS attends (
 tripID INT NOT NULL, 
@@ -189,10 +240,10 @@ END$$
 
 DELIMITER ;
 
-START TRANSACTION;
-INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
-ROLLBACK;
+#START TRANSACTION;
+#INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+#ROLLBACK;
 
 ## Test Code to get list of attendees
 
@@ -215,12 +266,12 @@ END$$
 
 DELIMITER ;
 
-START transaction;
-CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
-CALL create_trip ("Springfield", "USA", "MyTrip2", "", '2024-01-09', '2024-01-16', "enguyen1");
-CALL get_owner_active_trips("enguyen1");
-ROLLBACK;
+#START transaction;
+#CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#CALL create_trip ("Boston", "USA", "MyTrip", "", '2024-01-01', '2024-01-08', "enguyen1");
+#CALL create_trip ("Springfield", "USA", "MyTrip2", "", '2024-01-09', '2024-01-16', "enguyen1");
+#CALL get_owner_active_trips("enguyen1");
+#ROLLBACK;
 
 DELIMITER $$
 
@@ -268,11 +319,11 @@ END$$
 DELIMITER ;
 
 
-START TRANSACTION;
-INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL check_login_exists("enguyen1", "nguyen12");
-CALL check_login_exists("enguyen1", "nguyen13");
-ROLLBACK;
+#START TRANSACTION;
+#INSERT INTO user VALUES("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#CALL check_login_exists("enguyen1", "nguyen12");
+#CALL check_login_exists("enguyen1", "nguyen13");
+#ROLLBACK;
 
 CREATE TABLE IF NOT EXISTS transaction (
 transactionID INT AUTO_INCREMENT PRIMARY KEY,
@@ -303,21 +354,23 @@ REFERENCES expense(expenseID)
 );
 
 
+
+
 ###
 
-DELIMITER $$
+#DELIMITER $$
 
-CREATE PROCEDURE create_expense (
-expenseName_p varchar(32),
-cost_p INT)
-BEGIN 
-INSERT INTO expense (expenseName, cost)
-VALUES (expenseName_p, cost_p);
-END$$
+#CREATE PROCEDURE create_expense (
+#expenseName_p varchar(32),
+#cost_p INT)
+#BEGIN 
+#INSERT INTO expense (expenseName, cost)
+#VALUES (expenseName_p, cost_p);
+#END$$
 
-DELIMITER ;
+#DELIMITER ;
 
 
-START transaction;
-CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#START transaction;
+#CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+#CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
