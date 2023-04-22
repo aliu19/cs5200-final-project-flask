@@ -279,19 +279,13 @@ DELIMITER $$
 CREATE PROCEDURE create_expense (
 	IN expenseName_p VARCHAR(32),
     IN cost_p INT,
-    OUT expenseID_output INT
+    OUT expenseID_output DOUBLE
 )
 BEGIN 
 	INSERT INTO expense (expenseName, total_cost) VALUES (expenseName_p, cost_p);
     SELECT LAST_INSERT_ID() INTO expenseID_output;
 END$$
 DELIMITER ;
-
-START TRANSACTION;
-CALL create_expense('food', 100, @expenseID_output);
-SELECT @expenseID_output;
-INSERT INTO plans VALUES(@expenseID_output, 1, 'enguyen1');
-ROLLBACK;
 
 DELIMITER $$
 CREATE PROCEDURE create_plan (
@@ -316,13 +310,6 @@ BEGIN
 END$$
 DELIMITER ;
 
-START TRANSACTION;
-CALL create_expense('hotel', 100, @expenseID_output);
-SELECT @expenseID_output;
-CALL expense_is_accommodation(@expenseID_output, ' 1 Lincoln St', '2023-05-01', '2023-05-8');
-SELECT CONCAT(a.address, ',', a.startDate, ',', a.endDate) AS accommodation FROM accommodation AS a;
-ROLLBACK;
-
 DELIMITER $$
 CREATE PROCEDURE create_repay (
 	IN expenseID_p INT,
@@ -346,8 +333,20 @@ END$$
 
 DELIMITER ;
 
-CALL get_attendees(1);
-
-CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
-
+CALL create_user("enguyen1", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+CALL create_user("alui1", "123", "Andrew", "Lui", "lui.and@northeastern.edu");
+CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri2@northeastern.edu");
+CALL create_user("alui3", "123", "Andrew", "Lui", "lui.and3@northeastern.edu");
+CALL create_trip("Boston trip", "School trip", "Boston","USA", "2023-12-01", "2023-12-31", "enguyen1");
+CALL create_trip("NYC trip", "School trip", "New York City","USA", "2023-11-01", "2023-11-30", "alui1");
 CALL add_person_to_trip(1, "enguyen2");
+CALL add_person_to_trip(1, "alui1");
+CALL create_expense('food', 100, @expenseID_output);
+SELECT @expenseID_output;
+INSERT INTO plans VALUES(@expenseID_output, 1, 'enguyen1');
+CALL create_expense('hotel', 1000, @expenseID_output);
+SELECT @expenseID_output;
+CALL expense_is_accommodation(@expenseID_output, '1 Lincoln St', '2023-12-01', '2023-12-31');
+INSERT INTO plans VALUES(@expenseID_output, 1, 'enguyen1');
+CALL create_repay(3, "alui1", "enguyen1", 500, 0);
+CALL create_repay(3, "alui3", "enguyen1", 500, 0);
