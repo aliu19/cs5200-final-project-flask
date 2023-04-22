@@ -267,14 +267,35 @@ DELIMITER ;
 
 DELIMITER $$
 CREATE PROCEDURE create_expense (
-	expenseName_p VARCHAR(32),
-    cost_p INT
+	IN expenseName_p VARCHAR(32),
+    IN cost_p INT,
+    OUT expenseID_output INT
 )
 BEGIN 
 	INSERT INTO expense (expenseName, total_cost) VALUES (expenseName_p, cost_p);
+    SELECT LAST_INSERT_ID() INTO expenseID_output;
 END$$
 DELIMITER ;
 
 START TRANSACTION;
-CALL create_expense('food', 100);
+CALL create_expense('food', 100, @expenseID_output);
+SELECT @expenseID_output;
+INSERT INTO plans VALUES(@expenseID_output, 1, 'enguyen1');
+ROLLBACK;
+
+DELIMITER $$
+CREATE PROCEDURE create_plan (
+	IN expenseID_p INT,
+    IN tripID_p INT,
+    IN username_p VARCHAR(32)
+)
+BEGIN 
+	INSERT INTO plans VALUES (expenseID_p, tripID_p, username_p);
+END$$
+DELIMITER ;
+
+START TRANSACTION;
+CALL create_expense('food', 100, @expenseID_output);
+SELECT @expenseID_output;
+CALL create_plan(@expenseID_output, 1, 'enguyen1');
 ROLLBACK;
