@@ -304,8 +304,50 @@ BEGIN
 END$$
 DELIMITER ;
 
+DELIMITER $$
+CREATE PROCEDURE expense_is_accommodation (
+	IN expenseID_p INT,
+    IN address_p VARCHAR(32),
+    IN startDate_p DATE,
+    IN endDate_p Date
+)
+BEGIN 
+	INSERT INTO accommodation VALUES (expenseID_p, address_p, startDate_p, endDate_p);
+END$$
+DELIMITER ;
+
 START TRANSACTION;
-CALL create_expense('food', 100, @expenseID_output);
+CALL create_expense('hotel', 100, @expenseID_output);
 SELECT @expenseID_output;
-CALL create_plan(@expenseID_output, 1, 'enguyen1');
+CALL expense_is_accommodation(@expenseID_output, ' 1 Lincoln St', '2023-05-01', '2023-05-8');
+SELECT CONCAT(a.address, ',', a.startDate, ',', a.endDate) AS accommodation FROM accommodation AS a;
 ROLLBACK;
+
+DELIMITER $$
+CREATE PROCEDURE create_repay (
+	IN expenseID_p INT,
+    IN payer_p VARCHAR(32),
+    IN owedTo_p VARCHAR(32), 
+    IN amount_p INT,
+    IN transaction_completed_p BIT
+)
+BEGIN 
+	INSERT INTO repay VALUES (expenseID_p, payer_p, owedTo_p, amount_p, transaction_completed_p);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE PROCEDURE get_attendees (
+	tripID_p INT
+)
+BEGIN 
+	SELECT username FROM attends WHERE tripID = tripID_p; 
+END$$
+
+DELIMITER ;
+
+CALL get_attendees(1);
+
+CALL create_user("enguyen2", "nguyen12", "Eric", "Nguyen", "nguyen.eri@northeastern.edu");
+
+CALL add_person_to_trip(1, "enguyen2");
