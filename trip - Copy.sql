@@ -265,6 +265,16 @@ BEGIN
 END$$
 DELIMITER ;
 
+-- delete trip procedure
+DELIMITER $$
+CREATE PROCEDURE delete_trip (
+	tripID_p INT
+)
+BEGIN 
+	DELETE FROM trip WHERE tripID = tripID_p;
+END$$
+DELIMITER ;
+
 DELIMITER $$
 CREATE PROCEDURE create_expense (
 	expenseName_p VARCHAR(32),

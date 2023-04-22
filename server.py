@@ -181,7 +181,12 @@ try:
       except Exception as e:
         return {"message": str(e)}, 400
     elif request.method == 'DELETE':
-      return {"message": "deleted trip successfully!"}
+      try:
+        cursor.callproc("delete_trip", (trip_id,))
+        db.commit()
+        return {"message": "Deleted trip successfully!"}
+      except Exception as e:
+        return {"message": str(e)}, 400
 
   @app.route("/trip/<int:trip_id>/expenses", methods=['GET'])
   @jwt_required()
