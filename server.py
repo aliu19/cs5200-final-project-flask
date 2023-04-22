@@ -138,8 +138,11 @@ try:
         cursor.callproc("get_trip_info", args)
         trip = cursor.fetchall()[0]
 
-        attendees = trip["attendees"].split(",")
-        trip["attendees"] = [dict(attendee = a) for a in attendees]
+        if trip["attendees"] is None:
+          trip["attendees"] = []
+        else:
+          attendees = trip["attendees"].split(",")
+          trip["attendees"] = [dict(attendee = a) for a in attendees]
 
         return jsonify(trip)
       except Exception as e:
@@ -150,22 +153,25 @@ try:
   def trip(trip_id):
     if request.method == 'PUT':
       try:
-        if request.json["trip_name"]:
+        data = request.json
+        keys = data.keys()
+
+        if "trip_name" in keys:
           args = trip_id, request.json["trip_name"]
           cursor.callproc("update_trip_name", args)
-        if request.json["description"]:
+        if "description" in keys:
           args = trip_id, request.json["description"]
           cursor.callproc("update_trip_description", args)
-        if request.json["city"]:
+        if "city" in keys:
           args = trip_id, request.json["city"]
           cursor.callproc("update_trip_city", args)
-        if request.json["country"]:
+        if "country" in keys:
           args = trip_id, request.json["country"]
           cursor.callproc("update_trip_country", args)
-        if request.json["start_date"]:
+        if "start_date" in keys:
           args = trip_id, request.json["start_date"]
           cursor.callproc("update_trip_start_date", args)
-        if request.json["end_date"]:
+        if "end_date" in keys:
           args = trip_id, request.json["end_date"]
           cursor.callproc("update_trip_end_date", args)
 
@@ -175,7 +181,12 @@ try:
       except Exception as e:
         return {"message": str(e)}, 400
     elif request.method == 'DELETE':
-      return {"message": "deleted trip successfully!"}
+      try:
+        cursor.callproc("delete_trip", (trip_id,))
+        db.commit()
+        return {"message": "Deleted trip successfully!"}
+      except Exception as e:
+        return {"message": str(e)}, 400
 
   @app.route("/trip/<int:trip_id>/expenses", methods=['GET'])
   @jwt_required()
